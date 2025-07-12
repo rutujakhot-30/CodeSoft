@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz Maker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    h1 {
+      text-align: center;
+    }
+    .quiz-container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .question {
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    .options label {
+      display: block;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #218838;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    .highlight-correct {
+      background-color: #d4edda;
+      border-left: 5px solid #28a745;
+      padding: 5px;
+    }
+    .highlight-wrong {
+      background-color: #f8d7da;
+      border-left: 5px solid #dc3545;
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Quiz Maker</h1>
+  <div class="quiz-container" id="quiz"></div>
+  <div class="result" id="result"></div>
+  <div class="result" id="review"></div>
+  <script>
+    // ✅ Your quiz questions here
+    const quizData = [
+      {
+        question: "What is the capital of France?",
+        options: ["Berlin", "Madrid", "Paris", "Rome"],
+        correct: 2 // index in options array
+      },
+      {
+        question: "Which language runs in a web browser?",
+        options: ["Java", "C", "Python", "JavaScript"],
+        correct: 3
+      },
+      {
+        question: "Who is the founder of Microsoft?",
+        options: ["Steve Jobs", "Bill Gates", "Elon Musk", "Mark Zuckerberg"],
+        correct: 1
+      }
+    ];
+
+    const quizContainer = document.getElementById("quiz");
+    const resultContainer = document.getElementById("result");
+    const reviewContainer = document.getElementById("review");
+
+    let userAnswers = [];
+
+    function loadQuiz() {
+      let output = "";
+      quizData.forEach((q, i) => {
+        output += `<div class="question">${i+1}. ${q.question}</div>`;
+        output += `<div class="options">`;
+        q.options.forEach((option, j) => {
+          output += `
+            <label>
+              <input type="radio" name="question${i}" value="${j}"> ${option}
+            </label>`;
+        });
+        output += `</div>`;
+      });
+      output += `<button onclick="submitQuiz()">Submit Quiz</button>`;
+      quizContainer.innerHTML = output;
+    }
+
+    function submitQuiz() {
+      let score = 0;
+      let wrong = 0;
+      userAnswers = [];
+
+      quizData.forEach((q, i) => {
+        const selected = document.querySelector(`input[name="question${i}"]:checked`);
+        if (selected) {
+          const ans = parseInt(selected.value);
+          userAnswers.push(ans);
+          if (ans === q.correct) {
+            score++;
+          } else {
+            wrong++;
+          }
+        } else {
+          userAnswers.push(null);
+          wrong++;
+        }
+      });
+
+      resultContainer.innerHTML = `✅ You scored ${score} out of ${quizData.length}.<br>
+        Correct: ${score}, Wrong: ${wrong}.`;
+
+      // disable inputs
+      document.querySelectorAll("input[type=radio]").forEach(input => input.disabled = true);
+
+      // show review button
+      reviewContainer.innerHTML = `<button onclick="showReview()">Show Correct Answers</button>`;
+    }
+
+    function showReview() {
+      let reviewHTML = "";
+      quizData.forEach((q, i) => {
+        const userAns = userAnswers[i];
+        if (userAns === q.correct) {
+          reviewHTML += `<div class="highlight-correct">
+            ✅ ${i+1}. ${q.question}<br>
+            Your answer: ${q.options[userAns]}
+          </div>`;
+        } else {
+          reviewHTML += `<div class="highlight-wrong">
+            ❌ ${i+1}. ${q.question}<br>
+            Your answer: ${userAns !== null ? q.options[userAns] : "No answer selected"}<br>
+            Correct answer: ${q.options[q.correct]}
+          </div>`;
+        }
+      });
+      reviewContainer.innerHTML = reviewHTML;
+    }
+
+    loadQuiz();
+  </script>
+</body>
+</html>
